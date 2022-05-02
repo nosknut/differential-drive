@@ -86,6 +86,12 @@ find_package(catkin REQUIRED)
 #   cfg/DynReconf2.cfg
 # )
 
+#add dynamic reconfigure api
+find_package(catkin REQUIRED dynamic_reconfigure)
+generate_dynamic_reconfigure_options(
+  cfg/Pid.cfg
+  #...
+)
 ###################################
 ## catkin specific configuration ##
 ###################################

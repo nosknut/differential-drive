@@ -26,6 +26,9 @@ from std_msgs.msg import Int16
 from std_msgs.msg import Float32
 from numpy import array
 
+from dynamic_reconfigure.server import Server
+from differential_drive.cfg import PidConfig
+
 
 ######################################################
 ######################################################
@@ -67,6 +70,10 @@ class PidVelocity():
         self.vel_threshold = rospy.get_param('~vel_threshold', 0.001)
         self.encoder_min = rospy.get_param('encoder_min', -32768)
         self.encoder_max = rospy.get_param('encoder_max', 32768)
+
+        # server MUST be created AFTER the default values have been set
+        config_server = Server(PidConfig, self.dynamic_reconfigure_callback)
+
         self.encoder_low_wrap = rospy.get_param(
             'wheel_low_wrap', (self.encoder_max - self.encoder_min) * 0.3 + self.encoder_min)
         self.encoder_high_wrap = rospy.get_param(
@@ -82,6 +89,23 @@ class PidVelocity():
         rospy.Subscriber("wheel_vtarget", Float32, self.targetCallback)
         self.pub_motor = rospy.Publisher('motor_cmd', Float32, queue_size=10)
         self.pub_vel = rospy.Publisher('wheel_vel', Float32, queue_size=10)
+
+    def dynamic_reconfigure_callback(self, config, level):
+        # Update fields in the class with the values in config
+        self.Kp = config.get('Kp', self.Kp)
+        self.Ki = config.get('Ki', self.Ki)
+        self.Kd = config.get('Kd', self.Kd)
+        self.out_min = config.get('out_min', self.out_min)
+        self.out_max = config.get('out_max', self.out_max)
+        self.rate = config.get('rate', self.rate)
+        self.rolling_pts = config.get('rolling_pts', self.rolling_pts)
+        self.timeout_ticks = config.get('timeout_ticks', self.timeout_ticks)
+        self.ticks_per_meter = config.get('ticks_meter', self.ticks_per_meter)
+        self.vel_threshold = config.get('vel_threshold', self.vel_threshold)
+        self.encoder_min = config.get('encoder_min', self.encoder_min)
+        self.encoder_max = config.get('encoder_max', self.encoder_max)
+
+        return config
 
     #####################################################
 
