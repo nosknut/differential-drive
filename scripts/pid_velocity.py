@@ -91,6 +91,8 @@ class PidVelocity():
         self.pub_vel = rospy.Publisher('wheel_vel', Float32, queue_size=10)
 
     def dynamic_reconfigure_callback(self, config, level):
+        rospy.logdebug(
+            """Reconfigure Request: {Kp}, {Ki}, {Kd}, {out_min}, {out_max}, {rolling_pts}, {timeout_ticks}, {ticks_meter}, {vel_threshold}, {encoder_min}, {encoder_max}""".format(**config))
         # Update fields in the class with the values in config
         self.Kp = config.get('Kp', self.Kp)
         self.Ki = config.get('Ki', self.Ki)
@@ -101,9 +103,6 @@ class PidVelocity():
         self.rolling_pts = config.get('rolling_pts', self.rolling_pts)
         self.timeout_ticks = config.get('timeout_ticks', self.timeout_ticks)
         self.ticks_per_meter = config.get('ticks_meter', self.ticks_per_meter)
-        self.vel_threshold = config.get('vel_threshold', self.vel_threshold)
-        self.encoder_min = config.get('encoder_min', self.encoder_min)
-        self.encoder_max = config.get('encoder_max', self.encoder_max)
 
         return config
 
