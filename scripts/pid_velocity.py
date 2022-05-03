@@ -92,7 +92,8 @@ class PidVelocity():
 
     def dynamic_reconfigure_callback(self, config, level):
         rospy.logdebug(
-            """Reconfigure Request: {Kp}, {Ki}, {Kd}, {out_min}, {out_max}, {rolling_pts}, {timeout_ticks}, {ticks_meter}, {vel_threshold}, {encoder_min}, {encoder_max}""".format(**config))
+            """Reconfigure Request: {Kp}, {Ki}, {Kd}, {out_min}, {out_max}, {rolling_pts}, {timeout_ticks}, {ticks_meter}, {rate}""".format(**config))
+
         # Update fields in the class with the values in config
         self.Kp = config.get('Kp', self.Kp)
         self.Ki = config.get('Ki', self.Ki)
