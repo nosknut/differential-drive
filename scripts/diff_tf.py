@@ -51,11 +51,14 @@ diff_controller.py - controller for a differential drive
 
 """
 
+from csv import QUOTE_ALL
 from std_msgs.msg import Int16
-from tf.broadcaster import TransformBroadcaster
+from tf2_ros import TransformBroadcaster
 from nav_msgs.msg import Odometry
+from geometry_msgs.msg import Vector3
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Quaternion
+from geometry_msgs.msg import TransformStamped
 from math import sin, cos, pi
 import rospy
 import roslib
@@ -165,26 +168,32 @@ class DiffTf:
             if(th != 0):
                 self.th = self.th + th
 
+            position = Vector3()
+            position.x = self.x
+            position.y = self.y
+            position.z = 0
+
             # publish the odom information
             quaternion = Quaternion()
             quaternion.x = 0.0
             quaternion.y = 0.0
             quaternion.z = sin(self.th / 2)
             quaternion.w = cos(self.th / 2)
-            self.odomBroadcaster.sendTransform(
-                (self.x, self.y, 0),
-                (quaternion.x, quaternion.y, quaternion.z, quaternion.w),
-                rospy.Time.now(),
-                self.base_frame_id,
-                self.odom_frame_id
-            )
+
+            t = TransformStamped()
+
+            t.header.stamp = rospy.Time.now()
+            t.header.frame_id = self.odom_frame_id
+            t.child_frame_id = self.base_frame_id
+            t.transform.translation = position
+            t.transform.rotation = quaternion
+
+            self.odomBroadcaster.sendTransform(t)
 
             odom = Odometry()
             odom.header.stamp = now
             odom.header.frame_id = self.odom_frame_id
-            odom.pose.pose.position.x = self.x
-            odom.pose.pose.position.y = self.y
-            odom.pose.pose.position.z = 0
+            odom.pose.pose.position = position
             odom.pose.pose.orientation = quaternion
             odom.child_frame_id = self.base_frame_id
             odom.twist.twist.linear.x = self.dx
